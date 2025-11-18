@@ -87,6 +87,12 @@
         </tr>
       </tbody>
     </table>
+    <hr />
+    <div>
+      <button @click="handleDeleteConnection(graphStore.getSelectedConnection)">
+        Delete Connection
+      </button>
+    </div>
   </PropertiesDisplay>
 </template>
 
@@ -96,7 +102,7 @@
 import { useGraphStore } from '@/stores/graph'
 import { useBoardStore } from '@/stores/board'
 import PropertiesDisplay from '../PropertiesDisplay.vue'
-import { GraphConnectionDirectionality, type GraphNode } from '@/models/graph'
+import { GraphConnection, GraphConnectionDirectionality, type GraphNode } from '@/models/graph'
 
 const graphStore = useGraphStore()
 const boardStore = useBoardStore()
@@ -109,5 +115,13 @@ function selectNode(node: GraphNode) {
 function handleClose() {
   graphStore.setSelectedConnection(null)
   boardStore.draw()
+}
+
+function handleDeleteConnection(connection: GraphConnection | null) {
+  if (connection) {
+    connection.delete(graphStore.graph)
+    graphStore.setSelectedConnection(null)
+    boardStore.draw()
+  }
 }
 </script>

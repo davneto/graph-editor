@@ -52,6 +52,8 @@
         <span class="clickable">connection{{ connection?.id ?? '-' }}</span>
       </div>
     </div>
+    <hr />
+    <div><button @click="handleDeleteNode(graphStore.getSelectedNode)">Delete Node</button></div>
   </PropertiesDisplay>
 </template>
 
@@ -65,7 +67,7 @@
 <script setup lang="ts">
 import { useGraphStore } from '@/stores/graph'
 import { useBoardStore } from '@/stores/board'
-import type { GraphConnection } from '@/models/graph'
+import type { GraphConnection, GraphNode } from '@/models/graph'
 import PropertiesDisplay from '../PropertiesDisplay.vue'
 
 const graphStore = useGraphStore()
@@ -79,5 +81,13 @@ function selectConnection(connection: GraphConnection) {
 function handleClose() {
   graphStore.setSelectedNode(null)
   boardStore.draw()
+}
+
+function handleDeleteNode(node: GraphNode | null) {
+  if (node) {
+    node.delete(graphStore.graph)
+    graphStore.setSelectedNode(null)
+    boardStore.draw()
+  }
 }
 </script>

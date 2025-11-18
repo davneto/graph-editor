@@ -38,6 +38,17 @@ export class GraphNode {
       (connection) => connection.node1 === node || connection.node2 === node,
     )
   }
+
+  public delete(graph: Graph) {
+    // remove all connections associated with this node
+    this.connections.forEach((connection) => {
+      connection.delete(graph)
+    })
+
+    // DELETE FROM GRAPH
+    // replace nodes with a filtered array excluding this node
+    graph.nodes = graph.nodes.filter((node) => node !== this)
+  }
 }
 
 export enum GraphConnectionDirectionality {
@@ -73,5 +84,19 @@ export class GraphConnection {
 
   public static setIdCounter(value: number) {
     GraphConnection.idCounter = value
+  }
+
+  public delete(graph: Graph) {
+    // DELETE FROM NODE 1
+    // replace connections with a filtered array excluding this connection
+    this.node1.connections = this.node1.connections.filter((connection) => connection !== this)
+
+    // DELETE FROM NODE 2
+    // replace connections with a filtered array excluding this connection
+    this.node2.connections = this.node2.connections.filter((connection) => connection !== this)
+
+    // DELETE FROM GRAPH
+    // replace connections with a filtered array excluding this connection
+    graph.connections = graph.connections.filter((connection) => connection !== this)
   }
 }
