@@ -5,7 +5,7 @@ export function drawBoardGrid(
   spacing = 100,
 ) {
   if (!canvasContext) return
-  canvasContext.strokeStyle = '#ddd'
+  canvasContext.strokeStyle = '#a5a5a5ff'
   canvasContext.lineWidth = 1
 
   for (let x = -width; x < width; x += spacing) {

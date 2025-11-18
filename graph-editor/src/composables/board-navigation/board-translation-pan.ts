@@ -1,5 +1,6 @@
 import type { Ref } from 'vue'
 import { offsetX, offsetY, scale } from './board-state'
+import { useBoardStore } from '@/stores/board'
 
 let isDragging = false
 let lastX: number, lastY: number
@@ -9,12 +10,18 @@ export function useBoardTranslationPan(canvas: Ref<HTMLCanvasElement | null>, dr
   if (!canvas.value) return
 
   canvas.value?.addEventListener('mousedown', (event: MouseEvent) => {
+    const boardPanZoomStore = useBoardStore()
+    if (!boardPanZoomStore.isPanActive) return
+
     isDragging = true
     lastX = event.clientX
     lastY = event.clientY
   })
 
   canvas.value?.addEventListener('mousemove', (event: MouseEvent) => {
+    const boardPanZoomStore = useBoardStore()
+    if (!boardPanZoomStore.isPanActive) return
+
     if (!canvas.value) return
     if (isDragging) {
       const dx = event.clientX - lastX
@@ -46,10 +53,16 @@ export function useBoardTranslationPan(canvas: Ref<HTMLCanvasElement | null>, dr
   })
 
   canvas.value?.addEventListener('mouseup', () => {
+    const boardPanZoomStore = useBoardStore()
+    if (!boardPanZoomStore.isPanActive) return
+
     isDragging = false
     draw()
   })
   canvas.value?.addEventListener('mouseleave', () => {
+    const boardPanZoomStore = useBoardStore()
+    if (!boardPanZoomStore.isPanActive) return
+
     isDragging = false
     draw()
   })

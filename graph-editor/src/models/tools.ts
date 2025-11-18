@@ -1,0 +1,5 @@
+export enum Tools {
+  POINTER = 'POINTER',
+  ADD_NODE = 'ADD_NODE',
+  ADD_CONNECTION = 'ADD_CONNECTION',
+}

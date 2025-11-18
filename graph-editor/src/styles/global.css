@@ -8,6 +8,19 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* div {
-  box-sizing: border-box;
-} */
+.pointer-events-none {
+  pointer-events: none;
+}
+
+.pointer-events {
+  pointer-events: auto;
+}
+
+table.properties-table th {
+  text-align: left;
+}
+
+.clickable {
+  cursor: pointer;
+  color: blue;
+}

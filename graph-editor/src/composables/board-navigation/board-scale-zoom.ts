@@ -1,11 +1,16 @@
 import type { Ref } from 'vue'
 import { offsetX, offsetY, scale } from './board-state'
+import { useBoardStore } from '@/stores/board'
 
 export function useBoardScaleZoom(canvas: Ref<HTMLCanvasElement | null>, draw: () => void) {
   if (!canvas.value) return
 
   canvas.value?.addEventListener('wheel', (event: WheelEvent) => {
+    const boardPanZoomStore = useBoardStore()
+    if (!boardPanZoomStore.isZoomActive) return
+
     event.preventDefault()
+
     const mouseX = event.offsetX
     const mouseY = event.offsetY
     const oldScale = scale.value // Store the scale before changing it
