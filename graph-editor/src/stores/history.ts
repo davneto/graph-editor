@@ -4,6 +4,8 @@ import { defineStore } from 'pinia'
 import { v4 as uuidv4 } from 'uuid'
 import { useGraphStore } from './graph'
 import { useBoardStore } from './board'
+import { postState } from '@/api/history-sync'
+import { useToolsStore } from './tools'
 
 // Define the state type
 export interface HistoryState {
@@ -92,6 +94,34 @@ export const useHistoryStore = defineStore('historyStore', {
       } else {
         console.info('No history found in localStorage to restore')
       }
+
+      this.history.updateHistoryState()
+
+      boardStore.draw()
+    },
+    async syncPendingChanges() {
+      const toolsStore = useToolsStore()
+      const boardStore = useBoardStore()
+
+      toolsStore.isSyncing = true
+      const historyData = await postState(this.history.getAsData())
+
+      // TODO: At this point some form of validation of the server response should be done
+
+      // Update local history state based on server response
+      this.history.uuid = historyData.uuid
+      this.history.nextActionSequenceNumber = historyData.nextActionSequenceNumber
+      this.history.nextNodeId = historyData.nextNodeId
+      this.history.nextConnectionId = historyData.nextConnectionId
+      this.history.actions = historyData.actions
+      toolsStore.isSyncing = false
+
+      // reconstruct graph from history
+      const graphStore = useGraphStore()
+      const newGraph = Graph.generateFromHistory(this.history)
+      graphStore.setGraph(newGraph)
+
+      console.info('Restored app state from history in server sync')
 
       this.history.updateHistoryState()
 

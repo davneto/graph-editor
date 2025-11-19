@@ -179,6 +179,8 @@ export class Graph {
             )
 
             newConnection.id = connData.id // set to original ID
+            node1.connections.push(newConnection)
+            node2.connections.push(newConnection)
             graph.connections.push(newConnection)
           }
           break

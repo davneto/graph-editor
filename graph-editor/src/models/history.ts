@@ -1,5 +1,7 @@
 import { v4 as uuidv4 } from 'uuid'
 import { GraphConnection, GraphNode } from './graph'
+import { postState } from '@/api/history-sync'
+import { useGraphStore } from '@/stores/graph'
 
 export enum ActionType {
   ADD_NODE = 'ADD_NODE',
@@ -10,6 +12,14 @@ export enum ActionType {
   DELETE_CONNECTION = 'DELETE_CONNECTION',
 }
 
+export interface HistoryData {
+  uuid: string
+  nextActionSequenceNumber: number
+  nextNodeId: number
+  nextConnectionId: number
+  actions: Action[]
+}
+
 export class History {
   constructor(
     public uuid: string, // stores reference of this history version to make it easy to compare versions
@@ -18,6 +28,16 @@ export class History {
     public nextConnectionId: number = 0,
     public actions: Action[],
   ) {}
+
+  public getAsData(): HistoryData {
+    return {
+      uuid: this.uuid,
+      nextActionSequenceNumber: this.nextActionSequenceNumber,
+      nextNodeId: this.nextNodeId,
+      nextConnectionId: this.nextConnectionId,
+      actions: this.actions,
+    }
+  }
 
   public updateHistoryState() {
     this.uuid = uuidv4() // update UUID to represent new state
@@ -34,6 +54,7 @@ export class History {
     }
     this.actions.push(action)
     this.updateHistoryState()
+    console.log(this.getAsData())
   }
   public record_editNode(nodeData: EditNodeData) {
     const action: Action = {
