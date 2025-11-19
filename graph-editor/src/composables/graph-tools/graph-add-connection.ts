@@ -5,6 +5,7 @@ import { useGraphStore } from '@/stores/graph'
 import { useToolsStore } from '@/stores/tools'
 import type { Ref } from 'vue'
 import { getBoardClickPosition } from '@/composables/board-navigation/board-get-click-position'
+import { useHistoryStore } from '@/stores/history'
 
 let initialNode: GraphNode | null = null
 
@@ -104,6 +105,7 @@ function detectNodeAndInitiateConnection(boardClickPosition: CartesianCoordinate
 
 function detectNodeAndFinishConnection(boardClickPosition: CartesianCoordinates) {
   const graphStore = useGraphStore()
+  const historyStore = useHistoryStore()
 
   // Select initial node if clicked on it
   graphStore.getNodes.forEach((node: GraphNode) => {
@@ -122,6 +124,7 @@ function detectNodeAndFinishConnection(boardClickPosition: CartesianCoordinates)
 
       // add it to graph list of connections
       graphStore.addConnection(graphConnection)
+      historyStore.record_addConnection(graphConnection)
 
       // add it to both nodes' list of connections
       initialNode.connections.push(graphConnection)

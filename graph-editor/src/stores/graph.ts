@@ -1,6 +1,7 @@
 import type { Line } from '@/models/cartesian-geometry'
 import { Graph, GraphConnection, GraphNode } from '@/models/graph'
 import { defineStore } from 'pinia'
+import { useHistoryStore } from './history'
 
 // Define the state type
 export interface GraphState {

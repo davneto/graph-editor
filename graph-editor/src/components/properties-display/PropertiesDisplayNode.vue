@@ -24,7 +24,8 @@
             <input
               type="text"
               v-if="graphStore.getSelectedNode"
-              v-model="graphStore.getSelectedNode.label"
+              :value="graphStore.getSelectedNode.label"
+              @input="handleLabelInput"
             />
           </td>
         </tr>
@@ -36,7 +37,8 @@
             <input
               type="color"
               v-if="graphStore.getSelectedNode"
-              v-model="graphStore.getSelectedNode.color"
+              :value="graphStore.getSelectedNode.color"
+              @input="debouncedColorInput"
             />
           </td>
         </tr>
@@ -69,9 +71,12 @@ import { useGraphStore } from '@/stores/graph'
 import { useBoardStore } from '@/stores/board'
 import type { GraphConnection, GraphNode } from '@/models/graph'
 import PropertiesDisplay from '../PropertiesDisplay.vue'
+import { useHistoryStore } from '@/stores/history'
+import { debounce } from '@/models/utils'
 
 const graphStore = useGraphStore()
 const boardStore = useBoardStore()
+const historyStore = useHistoryStore()
 
 function selectConnection(connection: GraphConnection) {
   graphStore.setSelectedConnection(connection)
@@ -83,11 +88,37 @@ function handleClose() {
   boardStore.draw()
 }
 
+function handleLabelInput(event: Event) {
+  const target = event.target as HTMLInputElement
+  if (graphStore.getSelectedNode) {
+    graphStore.getSelectedNode.label = target.value
+    boardStore.draw()
+
+    historyStore.record_editNode(graphStore.getSelectedNode)
+  }
+}
+
+const debouncedColorInput = debounce((event: Event) => {
+  handleColorInput(event)
+}, 300)
+
+function handleColorInput(event: Event) {
+  const target = event.target as HTMLInputElement
+  if (graphStore.getSelectedNode) {
+    graphStore.getSelectedNode.color = target.value
+    boardStore.draw()
+
+    historyStore.record_editNode(graphStore.getSelectedNode)
+  }
+}
+
 function handleDeleteNode(node: GraphNode | null) {
   if (node) {
     node.delete(graphStore.graph)
     graphStore.setSelectedNode(null)
     boardStore.draw()
+
+    historyStore.record_deleteNode(node.id)
   }
 }
 </script>

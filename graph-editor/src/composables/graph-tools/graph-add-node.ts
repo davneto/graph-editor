@@ -5,6 +5,7 @@ import { useGraphStore } from '@/stores/graph'
 import { useToolsStore } from '@/stores/tools'
 import type { Ref } from 'vue'
 import { getBoardClickPosition } from '@/composables/board-navigation/board-get-click-position'
+import { useHistoryStore } from '@/stores/history'
 
 export function useGraphToolAddNode(
   canvas: Ref<HTMLCanvasElement | null>,
@@ -38,7 +39,7 @@ export function useGraphToolAddNode(
 
 function addNode(boardClickPosition: CartesianCoordinates) {
   const graphStore = useGraphStore()
-  const toolsStore = useToolsStore()
+  const historyStore = useHistoryStore()
 
   const graphNode: GraphNode = new GraphNode(
     'New Node',
@@ -47,6 +48,7 @@ function addNode(boardClickPosition: CartesianCoordinates) {
     boardClickPosition.y,
   )
   graphStore.addNode(graphNode)
+  historyStore.record_addNode(graphNode)
 
   // Revert to pointer tool after adding the node
   // toolsStore.selectTool(Tools.POINTER)

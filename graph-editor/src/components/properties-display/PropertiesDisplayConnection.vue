@@ -15,7 +15,8 @@
             <input
               type="number"
               v-if="graphStore.getSelectedConnection"
-              v-model.number="graphStore.getSelectedConnection.weight"
+              :value="graphStore.getSelectedConnection.weight"
+              @input="handleWeightInput"
             />
           </td>
         </tr>
@@ -26,7 +27,8 @@
           <td>
             <select
               v-if="graphStore.getSelectedConnection"
-              v-model.number="graphStore.getSelectedConnection.directionality"
+              :value="graphStore.getSelectedConnection.directionality"
+              @input="handleDirectionalityInput"
             >
               <option
                 :key="GraphConnectionDirectionality.UNDIRECTED"
@@ -57,7 +59,8 @@
             <input
               type="color"
               v-if="graphStore.getSelectedConnection"
-              v-model="graphStore.getSelectedConnection.color"
+              :value="graphStore.getSelectedConnection.color"
+              @input="debouncedColorInput"
             />
           </td>
         </tr>
@@ -103,9 +106,12 @@ import { useGraphStore } from '@/stores/graph'
 import { useBoardStore } from '@/stores/board'
 import PropertiesDisplay from '../PropertiesDisplay.vue'
 import { GraphConnection, GraphConnectionDirectionality, type GraphNode } from '@/models/graph'
+import { useHistoryStore } from '@/stores/history'
+import { debounce } from '@/models/utils'
 
 const graphStore = useGraphStore()
 const boardStore = useBoardStore()
+const historyStore = useHistoryStore()
 
 function selectNode(node: GraphNode) {
   graphStore.setSelectedNode(node)
@@ -117,11 +123,45 @@ function handleClose() {
   boardStore.draw()
 }
 
+function handleWeightInput(event: Event) {
+  const target = event.target as HTMLInputElement
+  if (graphStore.getSelectedConnection) {
+    graphStore.getSelectedConnection.weight = parseFloat(target.value)
+    boardStore.draw()
+  }
+}
+
+const debouncedColorInput = debounce((event: Event) => {
+  handleColorInput(event)
+}, 300)
+
+function handleDirectionalityInput(event: Event) {
+  const target = event.target as HTMLSelectElement
+  if (graphStore.getSelectedConnection) {
+    graphStore.getSelectedConnection.directionality = target.value as GraphConnectionDirectionality
+    boardStore.draw()
+
+    historyStore.record_editConnection(graphStore.getSelectedConnection)
+  }
+}
+
+function handleColorInput(event: Event) {
+  const target = event.target as HTMLInputElement
+  if (graphStore.getSelectedConnection) {
+    graphStore.getSelectedConnection.color = target.value
+    boardStore.draw()
+
+    historyStore.record_editConnection(graphStore.getSelectedConnection)
+  }
+}
+
 function handleDeleteConnection(connection: GraphConnection | null) {
   if (connection) {
     connection.delete(graphStore.graph)
     graphStore.setSelectedConnection(null)
     boardStore.draw()
+
+    historyStore.record_deleteConnection(connection)
   }
 }
 </script>
