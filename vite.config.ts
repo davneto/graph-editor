@@ -7,6 +7,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/graph-editor/',
   plugins: [
     vue(),
     vueDevTools(),
@@ -18,17 +19,17 @@ export default defineConfig({
       manifest: {
         name: 'Graph Editor',
         short_name: 'GraphEditor',
-        start_url: '/',
+        start_url: '/graph-editor/',
         display: 'standalone',
         background_color: '#ffffff',
         icons: [
           {
-            src: '/favicon-192x192.png',
+            src: '/graph-editor/favicon-192x192.png',
             sizes: '192x192',
             type: 'image/png',
           },
           {
-            src: '/favicon-512x512.png',
+            src: '/graph-editor/favicon-512x512.png',
             sizes: '512x512',
             type: 'image/png',
           },
