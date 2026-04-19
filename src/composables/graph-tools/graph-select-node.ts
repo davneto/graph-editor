@@ -5,6 +5,7 @@ import { useGraphStore } from '@/stores/graph'
 import { useToolsStore } from '@/stores/tools'
 import type { Ref } from 'vue'
 import { getBoardClickPosition } from '@/composables/board-navigation/board-get-click-position'
+import { scale, isDraggingNode } from '@/composables/board-navigation/board-state'
 
 export function useGraphToolSelectNode(
   canvas: Ref<HTMLCanvasElement | null>,
@@ -15,6 +16,7 @@ export function useGraphToolSelectNode(
 
   let isMoved = false // used to detect pure clicks without dragging
   let lastX: number, lastY: number
+  let draggingNode: GraphNode | null = null
 
   const toolsStore = useToolsStore()
   const graphStore = useGraphStore()
@@ -39,37 +41,58 @@ export function useGraphToolSelectNode(
         return
     }
 
-    // if (graphStore.getSelectedNode) {
-    //   setTimeout(() => {
-    //     // small hack to provide precedence to node selection over connection selection
-    //     graphStore.setSelectedConnection(null)
-    //     draw()
-    //   }, 0)
-    // } else {
     draw()
-    // }
   })
 
-  // Detect movement to distinguish between click and drag
   canvas.value.addEventListener('mousedown', (event: MouseEvent) => {
+    if (toolsStore.getSelectedTool !== Tools.POINTER) return
+
     isMoved = false
     lastX = event.clientX
     lastY = event.clientY
+
+    // Check if mousedown landed on a node — if so, start dragging it
+    const boardPos = getBoardClickPosition(new CartesianCoordinates(event.clientX, event.clientY))
+    const hit = graphStore.getNodes.find((node: GraphNode) =>
+      node.getCircle().isCollidingWithPoint(boardPos),
+    )
+    draggingNode = hit ?? null
+    isDraggingNode.value = draggingNode !== null
   })
 
-  // Update last mouse position on mouse move
   canvas.value.addEventListener('mousemove', (event: MouseEvent) => {
+    if (toolsStore.getSelectedTool !== Tools.POINTER) return
+
     const dx = event.clientX - lastX
     const dy = event.clientY - lastY
 
-    if (Math.abs(dx) > 10 || Math.abs(dy) > 10)
-      // tolerance to consider as movement
-      isMoved = true
+    if (Math.abs(dx) > 10 || Math.abs(dy) > 10) isMoved = true
+
+    if (draggingNode) {
+      // Convert the mouse delta from screen pixels to board coordinates.
+      // We can't use getBoardClickPosition here because that gives an absolute position —
+      // we need a delta, so we divide the pixel movement by the current scale.
+      draggingNode.x += dx / scale.value
+      draggingNode.y += dy / scale.value
+      lastX = event.clientX
+      lastY = event.clientY
+      draw()
+    }
+  })
+
+  canvas.value.addEventListener('mouseup', () => {
+    draggingNode = null
+    isDraggingNode.value = false
+  })
+
+  // Cancel drag if mouse leaves the canvas
+  canvas.value.addEventListener('mouseleave', () => {
+    draggingNode = null
+    isDraggingNode.value = false
   })
 }
 
 function detectAndSelectNode(boardClickPosition: CartesianCoordinates) {
-  // Placeholder for pointer tool click handling
   console.log('Pointer tool clicked at:', boardClickPosition.x, boardClickPosition.y)
   const graphStore = useGraphStore()
 

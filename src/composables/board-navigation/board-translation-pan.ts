@@ -1,5 +1,5 @@
 import type { Ref } from 'vue'
-import { offsetX, offsetY, scale } from './board-state'
+import { offsetX, offsetY, scale, isDraggingNode } from './board-state'
 import { useBoardStore } from '@/stores/board'
 
 let isDragging = false
@@ -12,6 +12,7 @@ export function useBoardTranslationPan(canvas: Ref<HTMLCanvasElement | null>, dr
   canvas.value?.addEventListener('mousedown', (event: MouseEvent) => {
     const boardPanZoomStore = useBoardStore()
     if (!boardPanZoomStore.isPanActive) return
+    if (isDraggingNode.value) return
 
     isDragging = true
     lastX = event.clientX
@@ -21,6 +22,7 @@ export function useBoardTranslationPan(canvas: Ref<HTMLCanvasElement | null>, dr
   canvas.value?.addEventListener('mousemove', (event: MouseEvent) => {
     const boardPanZoomStore = useBoardStore()
     if (!boardPanZoomStore.isPanActive) return
+    if (isDraggingNode.value) return
 
     if (!canvas.value) return
     if (isDragging) {
